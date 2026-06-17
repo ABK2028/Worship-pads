@@ -54,15 +54,16 @@ export default function App() {
         <label className="nav-select-label" htmlFor="page-select">
           Go to
         </label>
-        <button onClick={toggleFullscreen} style={{ marginRight: 8, borderRadius: 12, padding: '0.4rem 0.6rem', background: 'rgba(255,255,255,0.03)', color: '#fff', border: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer' }}>
+        <button onClick={toggleFullscreen} style={{ marginRight: 8, borderRadius: 12, padding: '0.4rem 0.6rem', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', color: '#fff', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.08)', transition: 'all 0.2s ease' }}>
           {isFull ? 'Exit Fullscreen' : 'Fullscreen'}
         </button>
         <select
           id="page-select"
-          value={location.pathname === '/' ? '/pads' : location.pathname}
+          value={location.pathname}
           onChange={(event) => navigate(event.target.value)}
           className="nav-select"
         >
+          <option value="/">Welcome</option>
           <option value="/pads">Pads</option>
           <option value="/add-chords">Add Chords</option>
         </select>

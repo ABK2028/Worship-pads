@@ -12,13 +12,16 @@ function Particle({ index, isDispersing }) {
   const x = Math.cos(angle) * radius;
   const y = Math.sin(angle) * radius;
   const symbol = NOTE_SYMBOLS[index % NOTE_SYMBOLS.length];
+  const colors = ['#00d9ff', '#d946ff', '#00b4ff'];
+  const color = colors[index % colors.length];
 
   return (
     <motion.span
       className="particle"
+      style={{ color }}
       initial={{ opacity: 0, scale: 0.5, x: 0, y: 0 }}
-      animate={isDispersing ? { opacity: 0, x: x * 2.1, y: y * 2.1, scale: 0.7 } : { opacity: 1, x, y, scale: 1 }}
-      transition={{ duration: isDispersing ? 1.0 : 1.4, ease: 'easeOut' }}
+      animate={isDispersing ? { opacity: 0, x: x * 4.2, y: y * 4.2, scale: 0.5 } : { opacity: 1, x, y, scale: 1 }}
+      transition={{ duration: isDispersing ? 1.2 : 1.4, ease: 'easeOut' }}
     >
       {symbol}
     </motion.span>
@@ -40,7 +43,7 @@ export default function Welcome() {
   const handleEnter = () => {
     if (isDispersing) return;
     setIsDispersing(true);
-    setTimeout(() => navigate('/pads'), 1100);
+    setTimeout(() => navigate('/pads'), 1300);
   };
 
   return (
@@ -62,9 +65,6 @@ export default function Welcome() {
         <p>AARON</p>
         <span className="subcopy">Tap anywhere to enter</span>
       </motion.div>
-      <div style={{ position: 'absolute', left: 26, bottom: 26, zIndex: 50 }}>
-        <Window title="Info" initiallyOpen={true}>{sampleContent}</Window>
-      </div>
     </div>
   );
 }

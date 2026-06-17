@@ -67,7 +67,11 @@ export default function Pads({ pads = [], customPads = [] }) {
     const now = contextRef.current.currentTime;
     const gain = contextRef.current.createGain();
     gain.gain.value = 0;
-    gain.gain.setTargetAtTime(volume, now, Math.max(fadeIn / 3, 0.05));
+    
+    // Cancel any existing scheduled changes and perform a linear fade in
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(volume, now + Math.max(fadeIn, 0.05));
 
     const source = contextRef.current.createBufferSource();
     source.buffer = chordData;
@@ -82,9 +86,14 @@ export default function Pads({ pads = [], customPads = [] }) {
     const audio = audioRefs.current[chord];
     if (!audio?.source || !audio?.gain) return;
     const now = contextRef.current.currentTime;
+    
+    // Cancel any existing scheduled changes and perform a linear fade out
     audio.gain.gain.cancelScheduledValues(now);
-    audio.gain.gain.setTargetAtTime(0, now, Math.max(fadeOut / 3, 0.05));
-    audio.source.stop(now + fadeOut);
+    audio.gain.gain.setValueAtTime(audio.gain.gain.value, now);
+    audio.gain.gain.linearRampToValueAtTime(0, now + Math.max(fadeOut, 0.05));
+    
+    // Stop the source after the fade out completes
+    audio.source.stop(now + Math.max(fadeOut, 0.05));
     audioRefs.current[chord] = { ...audio, source: null, gain: null };
   };
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const DEFAULT_CHORDS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
@@ -36,6 +37,8 @@ export default function AddChords({ customPads, setCustomPads }) {
     setStatus(`Removed pad ${chord}`);
   };
 
+  const navigate = useNavigate();
+
   const allChordList = [...DEFAULT_CHORDS, ...customPads.map((pad) => pad.chord).filter((chord) => !DEFAULT_CHORDS.includes(chord))];
 
   return (
@@ -43,44 +46,62 @@ export default function AddChords({ customPads, setCustomPads }) {
       <div className="panel">
         <h1>Add Chords</h1>
         <p>Upload audio for any chord and it will appear as a new pad.</p>
-
-        <label className="field-label">Chord name</label>
-        <input
-          type="text"
-          value={chordName}
-          onChange={(e) => setChordName(e.target.value)}
-          placeholder="C, Dm7, Gsus4, Verse Pad..."
-        />
-
-        <label className="field-label">Audio file</label>
-        <input type="file" accept="audio/*" onChange={handleFileSelect} />
-
-        <button className="primary-button" type="button" onClick={handleUpload}>
-          Upload new pad
-        </button>
-
-        {status && <div className="status-message">{status}</div>}
-
-        <div className="upload-preview">
-          {pendingFile ? pendingFile.name : 'No file selected yet'}
+        <div className="welcome-link-card">
+          <p>Want to go back to the welcome page?</p>
+          <button type="button" className="secondary-button" onClick={() => navigate('/')}>Go to Welcome</button>
         </div>
 
-        <div className="saved-chords">
-          <h2>All pads</h2>
-          <div className="saved-grid">
-            {allChordList.map((chord) => {
-              const isCustom = !!customPads.find((pad) => pad.chord === chord);
-              return (
-                <div key={chord} className={`saved-item ${isCustom ? 'saved-active' : ''}`}>
-                  <div className="saved-title">{chord}</div>
-                  {isCustom && (
-                    <button type="button" onClick={() => removePad(chord)}>
-                      Remove
-                    </button>
-                  )}
-                </div>
-              );
-            })}
+        <div className="add-chords-content">
+          <div className="upload-section">
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+              <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem' }}>Upload New Pad</h3>
+              
+              <label className="field-label">Chord name</label>
+              <input
+                type="text"
+                value={chordName}
+                onChange={(e) => setChordName(e.target.value)}
+                placeholder="C, Dm7, Gsus4, Verse Pad..."
+              />
+
+              <label className="field-label">Audio file</label>
+              <input type="file" accept="audio/*" onChange={handleFileSelect} />
+
+              <div className="upload-preview">
+                📁 {pendingFile ? pendingFile.name : 'No file selected yet'}
+              </div>
+
+              <button className="primary-button" type="button" onClick={handleUpload}>
+                + Upload "{chordName || 'Chord'}"
+              </button>
+
+              {status && <div className="status-message">{status}</div>}
+            </div>
+          </div>
+
+          <div className="pads-section">
+            <div className="saved-chords">
+              <h2>All pads</h2>
+              <div className="saved-grid">
+                {allChordList.map((chord) => {
+                  const customPad = customPads.find((pad) => pad.chord === chord);
+                  const isCustom = !!customPad;
+                  return (
+                    <div key={chord} className={`saved-item ${isCustom ? 'saved-active' : ''}`}>
+                      <div>
+                        <div className="saved-title">{chord}</div>
+                        {isCustom && <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>{customPad.filename}</div>}
+                      </div>
+                      {isCustom && (
+                        <button type="button" onClick={() => removePad(chord)}>
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>
