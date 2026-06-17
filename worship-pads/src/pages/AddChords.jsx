@@ -46,10 +46,6 @@ export default function AddChords({ customPads, setCustomPads }) {
       <div className="panel">
         <h1>Add Chords</h1>
         <p>Upload audio for any chord and it will appear as a new pad.</p>
-        <div className="welcome-link-card">
-          <p>Want to go back to the welcome page?</p>
-          <button type="button" className="secondary-button" onClick={() => navigate('/')}>Go to Welcome</button>
-        </div>
 
         <div className="add-chords-content">
           <div className="upload-section">
