@@ -110,15 +110,15 @@ button, input {
   width: 10px;
   height: 10px;
   border-radius: 100%;
-  background: radial-gradient(circle, #fff, rgba(255, 255, 255, 0.1));
-  box-shadow: 0 0 12px rgba(255, 210, 140, 0.18), 0 0 24px rgba(0, 217, 255, 0.08);
-  color: #00d9ff;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.05));
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2), 0 0 12px rgba(255, 182, 90, 0.1);
+  color: rgba(255, 255, 255, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   font-weight: bold;
-  text-shadow: 0 0 8px rgba(0, 217, 255, 0.6), 0 0 16px rgba(217, 70, 255, 0.3);
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 182, 90, 0.15);
 }
 
 .welcome-copy {
@@ -140,7 +140,7 @@ button, input {
   margin: 0.8rem 0 0;
   font-size: 1.1rem;
   letter-spacing: 0.3em;
-  color: var(--cyan);
+  color: #ffb65a;
   font-weight: 500;
 }
 

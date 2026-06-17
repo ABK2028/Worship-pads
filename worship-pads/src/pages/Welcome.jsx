@@ -12,7 +12,7 @@ function Particle({ index, isDispersing }) {
   const x = Math.cos(angle) * radius;
   const y = Math.sin(angle) * radius;
   const symbol = NOTE_SYMBOLS[index % NOTE_SYMBOLS.length];
-  const colors = ['#00d9ff', '#d946ff', '#00b4ff'];
+  const colors = ['rgba(255, 255, 255, 0.35)', 'rgba(255, 182, 90, 0.25)', 'rgba(255, 255, 255, 0.3)'];
   const color = colors[index % colors.length];
 
   return (
