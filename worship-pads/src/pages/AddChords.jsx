@@ -49,9 +49,8 @@ export default function AddChords({ customPads, setCustomPads }) {
 
         <div className="add-chords-content">
           <div className="upload-section">
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem' }}>Upload New Pad</h3>
-              
+            <h2 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem' }}>Upload New Pad</h2>
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '1.5rem' }}>
               <label className="field-label">Chord name</label>
               <input
                 type="text"
@@ -76,27 +75,25 @@ export default function AddChords({ customPads, setCustomPads }) {
           </div>
 
           <div className="pads-section">
-            <div className="saved-chords">
-              <h2>All pads</h2>
-              <div className="saved-grid">
-                {allChordList.map((chord) => {
-                  const customPad = customPads.find((pad) => pad.chord === chord);
-                  const isCustom = !!customPad;
-                  return (
-                    <div key={chord} className={`saved-item ${isCustom ? 'saved-active' : ''}`}>
-                      <div>
-                        <div className="saved-title">{chord}</div>
-                        {isCustom && <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>{customPad.filename}</div>}
-                      </div>
-                      {isCustom && (
-                        <button type="button" onClick={() => removePad(chord)}>
-                          Remove
-                        </button>
-                      )}
+            <h2 style={{ margin: '0 0 1.5rem' }}>All pads</h2>
+            <div className="saved-grid">
+              {allChordList.map((chord) => {
+                const customPad = customPads.find((pad) => pad.chord === chord);
+                const isCustom = !!customPad;
+                return (
+                  <div key={chord} className={`saved-item ${isCustom ? 'saved-active' : ''}`}>
+                    <div>
+                      <div className="saved-title">{chord}</div>
+                      {isCustom && <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>{customPad.filename}</div>}
                     </div>
-                  );
-                })}
-              </div>
+                    {isCustom && (
+                      <button type="button" onClick={() => removePad(chord)}>
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
