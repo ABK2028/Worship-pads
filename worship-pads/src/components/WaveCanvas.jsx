@@ -35,7 +35,7 @@ export default function WaveCanvas({ side = 'left' }) {
         return;
       }
 
-      const rows = 60;
+      const rows = 80;
       const cols = 14;
       const edgeX = isLeft ? w : 0;
       const dir = isLeft ? -1 : 1;
@@ -43,7 +43,7 @@ export default function WaveCanvas({ side = 'left' }) {
       for (let row = 0; row < rows; row++) {
         const rowProgress = row / rows;
         const perspective = 1 - rowProgress * 0.7;
-        const y = h - (rowProgress * h * 0.9) - h * 0.05;
+        const y = h - rowProgress * h;
         const brightness = (1 - rowProgress) * 0.8 + 0.1;
         const dotSize = perspective * 1.8 + 0.3;
         const spread = perspective * w * 0.9 + w * 0.1;
@@ -91,7 +91,7 @@ export default function WaveCanvas({ side = 'left' }) {
       const glowPoints = 80;
       for (let i = 0; i <= glowPoints; i++) {
         const progress = i / glowPoints;
-        const y = h - (progress * h * 0.9) - h * 0.05;
+        const y = h - progress * h;
         const perspective = 1 - progress * 0.7;
         const wavePhase = t * 0.8 + progress * rows * 0.15;
         const waveAmp = 25 * perspective + 5;
