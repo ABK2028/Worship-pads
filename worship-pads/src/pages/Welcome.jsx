@@ -1,6 +1,5 @@
 import './Welcome.css';
 import WaveCanvas from '../components/WaveCanvas';
-import WorshipPadsLogo from '../components/WorshipPadsLogo';
 
 export default function Welcome({ onEnter }) {
   return (
@@ -16,7 +15,7 @@ export default function Welcome({ onEnter }) {
       </div>
 
       <div className="content">
-        <WorshipPadsLogo size={260} />
+        <img src="/Logo Pads.png" alt="Logo Pads" className="logo" draggable="false" />
         <h2>WELCOME</h2>
         <p>Tap anywhere to enter</p>
       </div>
