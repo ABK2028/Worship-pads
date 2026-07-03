@@ -90,7 +90,7 @@ export default function App() {
         </select>
       </div>
       <Routes>
-        <Route path="/" element={<Welcome />} />
+        <Route path="/" element={<Welcome onEnter={() => navigate('/pads')} />} />
         <Route path="/pads" element={<Pads pads={pads} customPads={sharedPads} />} />
         <Route path="/add-chords" element={<AddChords customPads={sharedPads} setCustomPads={setSharedPads} refreshSharedPads={fetchSharedPads} />} />
       </Routes>
