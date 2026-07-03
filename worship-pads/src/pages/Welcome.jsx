@@ -15,7 +15,7 @@ export default function Welcome({ onEnter }) {
       </div>
 
       <div className="content">
-        <img src="/Logo Pads.png" alt="Logo Pads" className="logo" draggable="false" />
+        <img src="/Logo Pads.png" alt="Logo Pads" className="logo-image" draggable="false" />
         <h2>WELCOME</h2>
         <p>Tap anywhere to enter</p>
       </div>

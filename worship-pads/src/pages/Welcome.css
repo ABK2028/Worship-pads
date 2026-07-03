@@ -54,15 +54,11 @@
   gap: 1.5rem;
 }
 
-.worship-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.02);
-  box-shadow: 0 0 80px rgba(76, 242, 255, 0.12);
-  backdrop-filter: blur(12px);
+.logo-image {
+  width: 280px;
+  max-width: 68vw;
+  filter: drop-shadow(0 0 30px rgba(57, 215, 255, 0.35));
+  animation: float 5s ease-in-out infinite;
 }
 
 .content h2 {
