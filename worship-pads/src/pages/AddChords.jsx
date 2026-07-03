@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const DEFAULT_CHORDS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-export default function AddChords({ customPads, setCustomPads }) {
+export default function AddChords({ customPads, setCustomPads, refreshSharedPads }) {
   const [chordName, setChordName] = useState('');
   const [pendingFile, setPendingFile] = useState(null);
   const [status, setStatus] = useState('');
@@ -13,23 +14,42 @@ export default function AddChords({ customPads, setCustomPads }) {
     setStatus('');
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!pendingFile || !chordName.trim()) {
       setStatus('Please enter a chord name and select an audio file.');
       return;
     }
 
     const label = chordName.trim();
-    const reader = new FileReader();
-    reader.onload = () => {
-      const audioData = reader.result;
+    setStatus('Uploading...');
+    const formData = new FormData();
+    formData.append('chord', label);
+    formData.append('audio', pendingFile);
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Upload failed');
+      }
+
       const nextPads = customPads.filter((pad) => pad.chord !== label);
-      setCustomPads([...nextPads, { chord: label, audioData, filename: pendingFile.name }]);
+      const newPad = {
+        chord: label,
+        url: result.url.startsWith('http') ? result.url : `${BACKEND_URL}${result.url}`,
+        filename: result.originalName || result.filename,
+      };
+      setCustomPads([...nextPads, newPad]);
+      refreshSharedPads?.();
       setChordName('');
       setPendingFile(null);
-      setStatus(`Saved pad for ${label}`);
-    };
-    reader.readAsDataURL(pendingFile);
+      setStatus(`Uploaded pad for ${label}`);
+    } catch (error) {
+      setStatus(`Upload failed: ${error.message}`);
+    }
   };
 
   const removePad = (chord) => {

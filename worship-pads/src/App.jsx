@@ -5,33 +5,54 @@ import Pads from './pages/Pads';
 import AddChords from './pages/AddChords';
 import { useCallback } from 'react';
 
-const STORAGE_KEY = 'worship-pads-custom-chords';
+const STORAGE_KEY = 'worship-pads-shared-chords';
 const DEFAULT_CHORDS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [customPads, setCustomPads] = useState([]);
+  const [sharedPads, setSharedPads] = useState([]);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        setCustomPads(JSON.parse(saved));
+        setSharedPads(JSON.parse(saved));
       } catch {
-        setCustomPads([]);
+        setSharedPads([]);
       }
     }
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(customPads));
-  }, [customPads]);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(sharedPads));
+  }, [sharedPads]);
+
+  const fetchSharedPads = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/uploads`);
+      if (!response.ok) return;
+      const data = await response.json();
+      const normalized = data.map((item) => ({
+        chord: item.chord,
+        url: item.url.startsWith('http') ? item.url : `${BACKEND_URL}${item.url}`,
+        filename: item.originalName || item.filename,
+      }));
+      setSharedPads(normalized);
+    } catch (error) {
+      console.warn('Could not fetch shared chords:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSharedPads();
+  }, []);
 
   const pads = useMemo(() => {
-    const extras = customPads.filter((pad) => !DEFAULT_CHORDS.includes(pad.chord));
+    const extras = sharedPads.filter((pad) => !DEFAULT_CHORDS.includes(pad.chord));
     return [...DEFAULT_CHORDS.map((chord) => ({ chord })), ...extras];
-  }, [customPads]);
+  }, [sharedPads]);
 
   const [isFull, setIsFull] = useState(false);
   const toggleFullscreen = useCallback(async () => {
@@ -70,8 +91,8 @@ export default function App() {
       </div>
       <Routes>
         <Route path="/" element={<Welcome />} />
-        <Route path="/pads" element={<Pads pads={pads} customPads={customPads} />} />
-        <Route path="/add-chords" element={<AddChords customPads={customPads} setCustomPads={setCustomPads} />} />
+        <Route path="/pads" element={<Pads pads={pads} customPads={sharedPads} />} />
+        <Route path="/add-chords" element={<AddChords customPads={sharedPads} setCustomPads={setSharedPads} refreshSharedPads={fetchSharedPads} />} />
       </Routes>
     </div>
   );

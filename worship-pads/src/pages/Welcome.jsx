@@ -3,25 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Window from '../components/Window';
 
-const PARTICLE_COUNT = 72;
+const PARTICLE_COUNT = 120;
 const NOTE_SYMBOLS = ['♪', '♫', '♩', '♬', '♭', '♯'];
 
 function Particle({ index, isDispersing }) {
-  const angle = (index / PARTICLE_COUNT) * Math.PI * 2;
-  const radius = 170 + (index % 8) * 3;
-  const x = Math.cos(angle) * radius;
-  const y = Math.sin(angle) * radius;
+  // Generate random positions across the entire viewport
+  const randomX = (Math.random() - 0.5) * window.innerWidth;
+  const randomY = (Math.random() - 0.5) * window.innerHeight;
+  
+  // Seeded random for consistency
+  const seed = index * 12345;
+  const seedX = Math.sin(seed) * window.innerWidth * 0.6;
+  const seedY = Math.cos(seed) * window.innerHeight * 0.6;
+  
   const symbol = NOTE_SYMBOLS[index % NOTE_SYMBOLS.length];
-  const colors = ['rgba(255, 255, 255, 0.35)', 'rgba(255, 182, 90, 0.25)', 'rgba(255, 255, 255, 0.3)'];
+  const colors = ['rgba(255, 255, 255, 0.35)', 'rgba(255, 182, 90, 0.25)', 'rgba(255, 255, 255, 0.3)', 'rgba(0, 217, 255, 0.2)'];
   const color = colors[index % colors.length];
+  const delay = (index % 20) * 0.08;
 
   return (
     <motion.span
       className="particle"
       style={{ color }}
       initial={{ opacity: 0, scale: 0.5, x: 0, y: 0 }}
-      animate={isDispersing ? { opacity: 0, x: x * 4.2, y: y * 4.2, scale: 0.5 } : { opacity: 1, x, y, scale: 1 }}
-      transition={{ duration: isDispersing ? 1.2 : 1.4, ease: 'easeOut' }}
+      animate={isDispersing ? { opacity: 0, x: seedX * 1.8, y: seedY * 1.8, scale: 0.2 } : { opacity: 0.6, x: seedX, y: seedY, scale: 1 }}
+      transition={{ duration: isDispersing ? 1.2 : 1.6, ease: 'easeOut', delay: isDispersing ? 0 : delay }}
     >
       {symbol}
     </motion.span>
@@ -43,7 +49,8 @@ export default function Welcome() {
   const handleEnter = () => {
     if (isDispersing) return;
     setIsDispersing(true);
-    setTimeout(() => navigate('/pads'), 1300);
+    // Shorter delay so transition to Pads feels snappy
+    setTimeout(() => navigate('/pads'), 300);
   };
 
   return (

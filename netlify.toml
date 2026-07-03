@@ -1,5 +1,5 @@
 [build]
-  base = "noraa_parfums/frontend"
+  base = "worship-pads"
   command = "npm run build"
   publish = "dist"
 

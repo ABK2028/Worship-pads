@@ -2,25 +2,84 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 const DEFAULT_CHORDS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+const CROSSFADE_TIME = 0.25; // 250ms smooth crossfade
 
 export default function Pads({ pads = [], customPads = [] }) {
   const [activeChord, setActiveChord] = useState(null);
   const [volume, setVolume] = useState(0.78);
-  const [fadeIn, setFadeIn] = useState(2.0);
-  const [fadeOut, setFadeOut] = useState(2.0);
+  const [fadeIn, setFadeIn] = useState(0.25); // Reduced to 250ms for snappy response
+  const [fadeOut, setFadeOut] = useState(0.25); // Reduced to 250ms
   const [loadedAudio, setLoadedAudio] = useState({});
-  const audioRefs = useRef({});
+  
+  // Core refs
   const contextRef = useRef(null);
+  const masterGainRef = useRef(null);
+  const bufferCacheRef = useRef({});
+  const bufferPromisesRef = useRef({});
+  
+  // Track current playing source + gain for crossfading
+  const currentSourceRef = useRef({ source: null, gain: null, chord: null });
+  
+  // UI refs
   const volRef = useRef(null);
   const fadeInRef = useRef(null);
   const fadeOutRef = useRef(null);
 
+  // Initialize AudioContext on mount
   useEffect(() => {
-    contextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    contextRef.current = ctx;
+    
+    // Create master gain for volume control
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = 0.78;
+    masterGain.connect(ctx.destination);
+    masterGainRef.current = masterGain;
+
     return () => {
-      contextRef.current?.close();
+      // Stop current source if playing
+      if (currentSourceRef.current.source) {
+        currentSourceRef.current.source.stop();
+      }
+      ctx.close();
     };
   }, []);
+
+  // Preload all audio buffers on mount (non-blocking, parallel)
+  useEffect(() => {
+    const preloadAllAudio = () => {
+      const allChords = new Set([
+        ...DEFAULT_CHORDS,
+        ...pads.map(p => p.chord),
+        ...customPads.map(p => p.chord).filter(Boolean)
+      ]);
+
+      // Start loads in parallel after a short delay so navigation animation isn't blocked
+      setTimeout(() => {
+        const promises = [...allChords].map((chord) => loadBuffer(chord));
+        // Run in background; don't await here to avoid blocking render
+        Promise.allSettled(promises).catch(() => {});
+      }, 200);
+    };
+
+    if (contextRef.current) {
+      preloadAllAudio();
+    }
+  }, [pads, customPads]);
+
+  // Real-time fade updates for currently playing audio
+  useEffect(() => {
+    if (!currentSourceRef.current.gain || !contextRef.current) return;
+
+    const now = contextRef.current.currentTime;
+    const gainNode = currentSourceRef.current.gain;
+    
+    // If audio is playing, update the fade values
+    // This will cause the audio to smoothly adjust to new fade parameters
+    gainNode.gain.cancelScheduledValues(now);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.linearRampToValueAtTime(volume, now + Math.max(fadeIn, 0.05));
+  }, [fadeIn]);
 
   const customAudioMap = useMemo(() => {
     return customPads.reduce((map, pad) => {
@@ -32,94 +91,138 @@ export default function Pads({ pads = [], customPads = [] }) {
   const primaryPads = useMemo(() => pads.slice(0, 12), [pads]);
   const extraPads = useMemo(() => pads.slice(12), [pads]);
 
-  const loadAudioSource = async (chord) => {
-    const customPad = customAudioMap[chord];
-    if (customPad?.audioData) return customPad.audioData;
-
-    const response = await fetch(`/audio/${encodeURIComponent(chord)}.mp3`);
-    if (!response.ok) return null;
-    return await response.arrayBuffer();
-  };
-
-  const handleLoadAudio = async (chord) => {
-    if (!contextRef.current) return;
-    if (loadedAudio[chord]) return;
+  /**
+   * Load audio buffer from file and cache it
+   */
+  const loadBuffer = async (chord) => {
+    if (bufferCacheRef.current[chord]) return bufferCacheRef.current[chord];
+    if (bufferPromisesRef.current[chord]) return bufferPromisesRef.current[chord];
+    if (!contextRef.current) return null;
 
     try {
-      const source = await loadAudioSource(chord);
-      if (!source) return;
+      let arrayBuffer;
+      
+      // Check for custom audio
+      const customPad = customAudioMap[chord];
+      if (customPad?.audioData) {
+        arrayBuffer = customPad.audioData;
+      } else {
+        // Fetch from file
+        const response = await fetch(`/audio/${encodeURIComponent(chord)}.mp3`);
+        if (!response.ok) return null;
+        arrayBuffer = await response.arrayBuffer();
+      }
 
-      const data = source instanceof ArrayBuffer ? source : await fetch(source).then((res) => res.arrayBuffer());
-      const buffer = await contextRef.current.decodeAudioData(data);
-      audioRefs.current[chord] = { buffer, source: null, gain: null };
-      setLoadedAudio((prev) => ({ ...prev, [chord]: true }));
+      // Kick off decoding and store the promise to prevent duplicate work
+      const decodePromise = contextRef.current.decodeAudioData(arrayBuffer).then((buffer) => {
+        bufferCacheRef.current[chord] = buffer;
+        setLoadedAudio((prev) => ({ ...prev, [chord]: true }));
+        delete bufferPromisesRef.current[chord];
+        return buffer;
+      }).catch((err) => {
+        delete bufferPromisesRef.current[chord];
+        throw err;
+      });
+
+      bufferPromisesRef.current[chord] = decodePromise;
+      return decodePromise;
     } catch (error) {
-      console.error('Failed to load audio', chord, error);
+      console.error(`Failed to load audio for ${chord}:`, error);
+      return null;
     }
   };
 
+  /**
+   * Play a chord with crossfade effect
+   */
   const playChord = async (chord) => {
-    if (!contextRef.current) return;
-    await handleLoadAudio(chord);
-    const chordData = audioRefs.current[chord]?.buffer;
-    if (!chordData) return;
+    if (!contextRef.current || !masterGainRef.current) return;
+
+    const buffer = await loadBuffer(chord);
+    if (!buffer) return;
 
     const now = contextRef.current.currentTime;
-    const gain = contextRef.current.createGain();
-    gain.gain.value = 0;
-    
-    // Cancel any existing scheduled changes and perform a linear fade in
-    gain.gain.cancelScheduledValues(now);
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(volume, now + Math.max(fadeIn, 0.05));
+    const effectiveFadeIn = Math.max(fadeIn, 0.05);
+    const effectiveFadeOut = Math.max(fadeOut, 0.05);
 
+    // Fade out previous source if it exists
+    if (currentSourceRef.current.source && currentSourceRef.current.gain) {
+      const oldGain = currentSourceRef.current.gain;
+      oldGain.gain.cancelScheduledValues(now);
+      oldGain.gain.setValueAtTime(oldGain.gain.value, now);
+      oldGain.gain.linearRampToValueAtTime(0, now + effectiveFadeOut);
+      
+      // Stop old source after fade completes
+      currentSourceRef.current.source.stop(now + effectiveFadeOut);
+    }
+
+    // Create new source + gain
     const source = contextRef.current.createBufferSource();
-    source.buffer = chordData;
-    source.loop = true;
-    source.connect(gain).connect(contextRef.current.destination);
+    const gainNode = contextRef.current.createGain();
+
+    source.buffer = buffer;
+    source.loop = true; // Seamless loop on decoded buffer
+    
+    // Connect: source -> gain -> masterGain -> destination
+    source.connect(gainNode);
+    gainNode.connect(masterGainRef.current);
+
+    // Fade in the new source (overlaps with fade out)
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(volume, now + effectiveFadeIn);
+
     source.start();
 
-    audioRefs.current[chord] = { ...audioRefs.current[chord], source, gain };
+    // Store for next transition
+    currentSourceRef.current = { source, gain: gainNode, chord };
   };
 
-  const stopChord = (chord) => {
-    const audio = audioRefs.current[chord];
-    if (!audio?.source || !audio?.gain) return;
+  /**
+   * Stop the currently playing chord with fade out
+   */
+  const stopChord = () => {
+    if (!currentSourceRef.current.source || !contextRef.current) return;
+
     const now = contextRef.current.currentTime;
-    
-    // Cancel any existing scheduled changes and perform a linear fade out
-    audio.gain.gain.cancelScheduledValues(now);
-    audio.gain.gain.setValueAtTime(audio.gain.gain.value, now);
-    audio.gain.gain.linearRampToValueAtTime(0, now + Math.max(fadeOut, 0.05));
-    
-    // Stop the source after the fade out completes
-    audio.source.stop(now + Math.max(fadeOut, 0.05));
-    audioRefs.current[chord] = { ...audio, source: null, gain: null };
+    const fadeTime = Math.max(fadeOut, 0.05);
+    const gainNode = currentSourceRef.current.gain;
+
+    gainNode.gain.cancelScheduledValues(now);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.linearRampToValueAtTime(0, now + fadeTime);
+
+    currentSourceRef.current.source.stop(now + fadeTime);
+    currentSourceRef.current = { source: null, gain: null, chord: null };
   };
 
+  /**
+   * Handle tile click
+   */
   const handleChordClick = async (chord) => {
     if (activeChord === chord) {
-      stopChord(chord);
+      // Toggle off
+      stopChord();
       setActiveChord(null);
       return;
     }
 
-    if (activeChord) {
-      stopChord(activeChord);
-    }
-
+    // Switch to new chord (old one automatically crossfades out)
     await playChord(chord);
     setActiveChord(chord);
   };
 
+  /**
+   * Update master volume
+   */
   const handleVolumeChange = (event) => {
     const val = Number(event.target.value);
     setVolume(val);
-    const now = contextRef.current?.currentTime;
-    if (!now) return;
-    Object.values(audioRefs.current).forEach((audio) => {
-      if (audio?.gain) audio.gain.gain.setTargetAtTime(val, now, 0.01);
-    });
+    
+    if (masterGainRef.current && contextRef.current) {
+      const now = contextRef.current.currentTime;
+      masterGainRef.current.gain.setTargetAtTime(val, now, 0.01);
+    }
+    
     if (volRef.current) updateRangeBackground(volRef.current, val, 0, 1);
   };
 
@@ -127,8 +230,8 @@ export default function Pads({ pads = [], customPads = [] }) {
     const customPad = customAudioMap[chord];
     if (activeChord === chord) return 'Playing';
     if (customPad?.filename) return customPad.filename;
-    if (loadedAudio[chord] || customPad?.audioData) return 'Tap to play';
-    return 'No audio';
+    if (loadedAudio[chord] || customPad?.audioData) return 'Ready';
+    return 'Loading...';
   };
 
   const renderPadTile = (pad) => {
@@ -140,7 +243,6 @@ export default function Pads({ pads = [], customPads = [] }) {
         key={pad.chord}
         className={`pad-tile ${isActive ? 'active' : ''} ${!hasAudio ? 'no-audio' : ''}`}
         onClick={() => handleChordClick(pad.chord)}
-        onMouseEnter={() => handleLoadAudio(pad.chord)}
       >
         <span>{pad.chord}</span>
         <span className="tile-status">{getTileStatus(pad.chord)}</span>
