@@ -55,8 +55,8 @@
 }
 
 .logo-image {
-  width: 372px;
-  max-width: 75vw;
+  width: 496px;
+  max-width: 85vw;
   filter: drop-shadow(0 0 30px rgba(57, 215, 255, 0.35));
   animation: float 5s ease-in-out infinite;
 }
