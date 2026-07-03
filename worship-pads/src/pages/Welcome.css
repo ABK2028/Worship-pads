@@ -3,7 +3,7 @@
   width: 100vw;
   height: 100vh;
 
-  background: radial-gradient(circle at center, #0b0e18, #050609 35%, #030305 100%);
+  background: radial-gradient(circle at center, #06080f 0%, #020105 35%, #000000 100%);
   overflow: hidden;
   cursor: pointer;
 
@@ -14,12 +14,34 @@
   user-select: none;
 }
 
-.overlay {
+.wave-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30vw;
+  min-width: 220px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-panel::before {
+  content: '';
   position: absolute;
   inset: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.9), transparent 55%);
+  pointer-events: none;
+}
 
-  background: radial-gradient(circle at center, rgba(0, 255, 255, 0.12), transparent 40%),
-    linear-gradient(180deg, rgba(8, 17, 35, 0.7), rgba(2, 5, 10, 0.95));
+.wave-right::before {
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.9), transparent 55%);
+}
+
+.wave-left {
+  left: 0;
+}
+
+.wave-right {
+  right: 0;
 }
 
 .content {
@@ -32,52 +54,54 @@
   gap: 1.5rem;
 }
 
-.logo {
-  width: 300px;
-  max-width: 65vw;
-
-  filter:
-    drop-shadow(0 0 20px rgba(0, 255, 255, 0.25))
-    drop-shadow(0 0 40px rgba(140, 0, 255, 0.15));
-
-  margin-bottom: 0;
-  animation: float 5s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%,100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
+.worship-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: 0 0 80px rgba(76, 242, 255, 0.12);
+  backdrop-filter: blur(12px);
 }
 
 .content h2 {
   margin: 0;
 
-  color: #4cf0ff;
-  font-size: clamp(2.5rem, 3.5vw, 4.3rem);
+  color: transparent;
+  background-image: linear-gradient(90deg, #3de8ff, #8b6cff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  font-size: clamp(2.8rem, 4vw, 5rem);
   font-weight: 700;
   letter-spacing: 0.9rem;
   text-transform: uppercase;
 
-  text-shadow: 0 0 30px rgba(76, 240, 255, 0.55);
+  text-shadow: 0 0 30px rgba(62, 228, 255, 0.25);
 }
 
 .content p {
   margin: 0;
 
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 1rem;
-  letter-spacing: 0.12rem;
+  letter-spacing: 0.16rem;
   animation: pulse 2s infinite;
 }
 
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
 @keyframes pulse {
-  0%,100% {
-    opacity: .45;
+  0%, 100% {
+    opacity: 0.45;
   }
 
   50% {
