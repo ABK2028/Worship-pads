@@ -1,5 +1,8 @@
 {
     "chat.tools.terminal.autoApprove": {
-        "git -C noraa_parfums": true
+        "git -C noraa_parfums": true,
+        "git add": true,
+        "git commit": true,
+        "git push": true
     }
 }

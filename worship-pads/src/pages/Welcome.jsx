@@ -68,7 +68,8 @@ export default function Welcome() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
       >
-        <h1>CHURCH AMBIENT PADS</h1>
+        <img className="logo-image" src="/Logo Pads.png" alt="Logo Pads" />
+        <h1 className="visually-hidden">CHURCH AMBIENT PADS</h1>
         <p>AARON</p>
         <span className="subcopy">Tap anywhere to enter</span>
       </motion.div>
