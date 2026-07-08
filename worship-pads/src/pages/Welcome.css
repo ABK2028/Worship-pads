@@ -12,6 +12,9 @@
   align-items: center;
 
   user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .wave-panel {
@@ -58,7 +61,9 @@
   width: 496px;
   max-width: 85vw;
   filter: drop-shadow(0 0 30px rgba(57, 215, 255, 0.35));
+  -webkit-filter: drop-shadow(0 0 30px rgba(57, 215, 255, 0.35));
   animation: float 5s ease-in-out infinite;
+  -webkit-animation: float 5s ease-in-out infinite;
 }
 
 .content h2 {
@@ -68,12 +73,16 @@
   background-image: linear-gradient(90deg, #3de8ff, #8b6cff);
   background-clip: text;
   -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-size: clamp(2.8rem, 4vw, 5rem);
   font-weight: 700;
   letter-spacing: 0.9rem;
   text-transform: uppercase;
 
   text-shadow: 0 0 30px rgba(62, 228, 255, 0.25);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .content p {
@@ -83,6 +92,7 @@
   font-size: 1rem;
   letter-spacing: 0.16rem;
   animation: pulse 2s infinite;
+  -webkit-animation: pulse 2s infinite;
 }
 
 @keyframes float {

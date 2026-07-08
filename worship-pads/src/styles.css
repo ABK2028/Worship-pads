@@ -52,6 +52,8 @@ button, input {
   border: 1px solid rgba(44, 119, 217, 0.3);
   background: rgba(12, 18, 32, 0.75);
   backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  -moz-backdrop-filter: blur(18px);
   color: #fff;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.08);
   font-size: 0.95rem;
@@ -197,6 +199,8 @@ button, input {
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  -moz-backdrop-filter: blur(12px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.08);
 }
 
@@ -220,6 +224,8 @@ button, input {
   height: 6px;
   background: transparent;
   -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   cursor: pointer;
 }
 
@@ -337,6 +343,8 @@ button, input {
   border-radius: 32px;
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  -moz-backdrop-filter: blur(20px);
   border: 1px solid rgba(44, 119, 217, 0.18);
   box-shadow: 0 8px 32px rgba(44, 119, 217, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.08);
 }
@@ -389,10 +397,14 @@ button, input {
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  -moz-backdrop-filter: blur(12px);
   color: #fff;
   margin-bottom: 1.25rem;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
   transition: border-color 0.2s ease, background 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .panel input[type='text']:focus,
@@ -476,6 +488,8 @@ button, input {
   color: rgba(255, 255, 255, 0.9);
   background: rgba(0, 217, 255, 0.1);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  -moz-backdrop-filter: blur(12px);
   border: 1px solid rgba(0, 217, 255, 0.3);
   border-radius: 12px;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 217, 255, 0.15);

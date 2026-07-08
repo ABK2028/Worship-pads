@@ -57,11 +57,30 @@ export default function App() {
   const [isFull, setIsFull] = useState(false);
   const toggleFullscreen = useCallback(async () => {
     try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
+      const element = document.documentElement;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        // Request fullscreen with proper vendor prefixes
+        if (element.requestFullscreen) {
+          await element.requestFullscreen();
+        } else if (element.webkitRequestFullscreen) {
+          await element.webkitRequestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+          await element.mozRequestFullScreen();
+        } else if (element.msRequestFullscreen) {
+          await element.msRequestFullscreen();
+        }
         setIsFull(true);
       } else {
-        await document.exitFullscreen();
+        // Exit fullscreen with proper vendor prefixes
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          await document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          await document.msExitFullscreen();
+        }
         setIsFull(false);
       }
     } catch (e) {
