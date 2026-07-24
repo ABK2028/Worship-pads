@@ -1,5 +1,5 @@
 {
-  "name": "noraa-parfums-monorepo",
+  "name": "worship-pads-monorepo",
   "private": true,
   "version": "1.0.0",
   "engines": {
@@ -7,9 +7,11 @@
   },
   "scripts": {
     "install:backend": "npm --prefix noraa_parfums/backend install",
-    "install:frontend": "npm --prefix noraa_parfums/frontend install",
+    "install:frontend": "npm --prefix worship-pads install",
     "postinstall": "npm run install:backend",
-    "build": "npm run install:frontend && npm --prefix noraa_parfums/frontend run build",
-    "start": "npm --prefix noraa_parfums/backend start"
+    "build": "npm run install:frontend && npm --prefix worship-pads run build",
+    "start": "npm --prefix noraa_parfums/backend start",
+    "dev:frontend": "npm --prefix worship-pads run dev",
+    "dev:backend": "npm --prefix noraa_parfums/backend run dev"
   }
 }

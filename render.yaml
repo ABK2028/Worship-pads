@@ -13,7 +13,7 @@ services:
   - type: web
     name: noraa-frontend
     runtime: static
-    rootDir: noraa_parfums/frontend
+    rootDir: worship-pads
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     routes:
